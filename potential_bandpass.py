@@ -7,20 +7,27 @@ import numpy
 
 %matplotlib inline
 
-highCutoff = 510
+zeroHighCutoff = 510
 
-lowCuttoff = 490
+zeroLowCuttoff = 490
 
-wave = thinkdsp.read_wave('recievedfile.wav')
+wave = thinkdsp.read_wave('receivedfile.wav')
 
 wave.normalize()
 
 wave.make_audio()
 
-wave.plot(high=1000)
+windowSize = 0.5
 
-for i in range(len(wave.hs)):
-  if wave.fs[i] > highCutoff or wave.fs[i] < lowCutoff:
-    wave.hs[i] *= 0
+results = [];
 
-wave.plot(high=1000)
+for i in range(0, math.round(wave.duration / windowSize)):
+    segment = wave.segment(i * windowSize, windowSize)
+    segmentSpectrum = segment.make_spectrum()
+    segmentSpectrum.low_pass(510)
+    segmentSpectrum.high_pass(490)
+    segmentSpectrum.apodize()
+    if segementSpectrum[500] > .1:
+        results[i] = 1
+
+print(results)
